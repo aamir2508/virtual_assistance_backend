@@ -250,7 +250,13 @@ db.getConnection( async (err, connection) => {
    if (err) throw (err)
    console.log ("--------> Created new User")
    console.log(result.insertId)
-   res.sendStatus(201)
+  //  res.send("created")
+   //
+    res.writeHead(200, {"Content-Type": "application/json"});
+    var json = JSON.stringify({ 
+      created: true, 
+    });
+    res.end(json);
   })
  }
 }) 
