@@ -326,7 +326,12 @@ app.post("/login", (req, res)=> {
           if (result.length == 0) {
            connection.release()
            console.log("------> User Does not exists")
-           res.sendStatus(409) 
+          //  res.sendStatus(409)
+           res.writeHead(409, {"Content-Type": "application/json"});
+            var json = JSON.stringify({ 
+              result: "User does not exixts", 
+            });
+            res.end(json);
           } 
           else {
            await connection.query (delete_query, (err, result)=> {
@@ -334,12 +339,17 @@ app.post("/login", (req, res)=> {
            if (err) throw (err)
            console.log ("-------->User Deleted")
            console.log(result.insertId)
-           res.sendStatus(201)
+          //  res.sendStatus(201);
+           res.writeHead(200, {"Content-Type": "application/json"});
+            var json = JSON.stringify({ 
+              result: true, 
+            });
+            res.end(json);
           })
          }
         }) 
-        }) 
-        }) 
+      }) 
+    }) 
 
        //Update password
        app.post("/updateUserPassword", async (req,res) => {
@@ -377,7 +387,12 @@ app.post("/login", (req, res)=> {
                if (err) throw (err)
                console.log ("--------> Created new User")
                console.log(result.insertId)
-               res.sendStatus(201)
+              //  res.sendStatus(201);
+               res.writeHead(200, {"Content-Type": "application/json"});
+                var json = JSON.stringify({ 
+                  result: "Updated Successful", 
+                });
+                res.end(json);
               })
              })
             }) 
@@ -396,23 +411,34 @@ app.post("/login", (req, res)=> {
             }) 
 
             app.post("/createAuditReport", async (req,res) => {
-                const callTime = req.body.callTime;
-                const operatorName = req.body.operatorName;;
-                const duration = req.body.duration;
-                db.getConnection( async (err, connection) => {
+              const callStartTime = req.body.callStartTime;
+              const operatorName = req.body.operatorName;;
+              const callEndTime = req.body.callEndTime;
+              const reason = req.body.reason;;
+              const callOrigin = req.body.callOrigin;
+              const today = new Date(callStartTime);
+              const endDate = new Date(callEndTime);
+              const minutes = parseInt(Math.abs(endDate.getTime() - today.getTime()) / (1000 * 60) % 60);
+              const seconds = parseInt(Math.abs(endDate.getTime() - today.getTime()) / (1000) % 60); 
+              const callDuration = minutes + ' Minute ' + seconds + ' Seconds'
+              db.getConnection( async (err, connection) => {
+               if (err) throw (err)
+               const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?,?,?,?)"
+               const insert_query = mysql.format(sqlInsert,[callStartTime, operatorName,callDuration,callEndTime,callOrigin,reason])
+                 await connection.query (insert_query, (err, result)=> {
+                 connection.release()
                  if (err) throw (err)
-                 const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?)"
-                 const insert_query = mysql.format(sqlInsert,[callTime, operatorName,duration])
-                   await connection.query (insert_query, (err, result)=> {
-                   connection.release()
-                   if (err) throw (err)
-                   console.log ("--------> Created new User")
-                   console.log(result.insertId)
-                   res.sendStatus(201)
-               
-                }) 
-                }) 
-                }) 
+                 console.log ("--------> Created new User")
+                 console.log(result.insertId)
+                 res.writeHead(200, {"Content-Type": "application/json"});
+                  var json = JSON.stringify({ 
+                   created: true, 
+                    });
+                 res.end(json);
+             
+              }) 
+              }) 
+              })
 
 
                 app.get("/getAuditReport", async (req,res) => {
