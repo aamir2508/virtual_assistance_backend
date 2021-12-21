@@ -437,22 +437,28 @@ app.post("/login", (req, res)=> {
                  res.end(json);
              
               }) 
-              }) 
-              })
+          }) 
+      })
 
 
-                app.get("/getAuditReport", async (req,res) => {
-                    db.getConnection( async (err, connection) => {
-                     if (err) throw (err)
-                     const sqlSearch = "SELECT * FROM auditReports"
-                     const search_query = mysql.format(sqlSearch,[])
-                     await connection.query (search_query, async (err, result) => {
-                      if (err) throw (err)
-                                    console.log(result)
-                                    res.status(result)
-                                    res.sendStatus(201)
-        
-        
-                    }) 
-                    }) 
-                    }) 
+          app.get("/getAuditReport", async (req,res) => {
+              db.getConnection( async (err, connection) => {
+                if (err) throw (err)
+                const sqlSearch = "SELECT * FROM auditReports"
+                const search_query = mysql.format(sqlSearch,[])
+                await connection.query (search_query, async (err, result) => {
+                if (err) throw (err)
+                              console.log(result)
+                              // res.status(result)
+                              // res.sendStatus(201)
+
+            res.writeHead(200, {"Content-Type": "application/json"});
+            var json = JSON.stringify({ 
+              created: true, 
+              });
+              res.end(json);
+    
+    
+            }) 
+        }) 
+      }) 
