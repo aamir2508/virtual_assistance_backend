@@ -250,8 +250,6 @@ db.getConnection( async (err, connection) => {
    if (err) throw (err)
    console.log ("--------> Created new User")
    console.log(result.insertId)
-  //  res.send("created")
-   //
     res.writeHead(200, {"Content-Type": "application/json"});
     var json = JSON.stringify({ 
       created: true, 
@@ -278,18 +276,33 @@ app.post("/login", (req, res)=> {
       if (err) throw (err)
       if (result.length == 0) {
        console.log("--------> User does not exist")
-       res.sendStatus(404)
+          // res.sendStatus(404)
+          res.writeHead(404, {"Content-Type": "application/json"});
+          var json = JSON.stringify({ 
+            result: "User does not exist", 
+          });
+          res.end(json);
       } 
       else {
          const hashedPassword = result[0].password
          //get the hashedPassword from result
         if (await bcrypt.compare(password, hashedPassword)) {
         console.log("---------> Login Successful")
-        res.send(`${user} is logged in!`)
+        // res.send(`${user} is logged in!`)
+        res.writeHead(200, {"Content-Type": "application/json"});
+          var json = JSON.stringify({ 
+            result: `${user} is logged in!`, 
+          });
+          res.end(json);
         } 
         else {
         console.log("---------> Password Incorrect")
-        res.send("Password incorrect!")
+        // res.send("Password incorrect!");
+        res.writeHead(403, {"Content-Type": "application/json"});
+          var json = JSON.stringify({ 
+            result: "Password incorrect!", 
+          });
+          res.end(json);
         } 
       }
      }) 
