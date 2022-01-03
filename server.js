@@ -291,7 +291,8 @@ app.post("/login", (req, res)=> {
         // res.send(`${user} is logged in!`)
         res.writeHead(200, {"Content-Type": "application/json"});
           var json = JSON.stringify({ 
-            result: `${user} is logged in!`, 
+            result: `${user} is logged in!`,
+            details:result
           });
           res.end(json);
         } 
@@ -441,24 +442,65 @@ app.post("/login", (req, res)=> {
       })
 
 
-          app.get("/getAuditReport", async (req,res) => {
-              db.getConnection( async (err, connection) => {
-                if (err) throw (err)
-                const sqlSearch = "SELECT * FROM auditReports"
-                const search_query = mysql.format(sqlSearch,[])
-                await connection.query (search_query, async (err, result) => {
-                if (err) throw (err)
-                              console.log(result)
-                              // res.status(result)
-                              // res.sendStatus(201)
-
-            res.writeHead(200, {"Content-Type": "application/json"});
-            var json = JSON.stringify({ 
-              created: true, 
-              });
-              res.end(json);
-    
-    
-            }) 
+      app.get("/getAuditReport", async (req,res) => {
+        db.getConnection( async (err, connection) => {
+         if (err) throw (err)
+         const sqlSearch = "SELECT * FROM auditReports"
+         const search_query = mysql.format(sqlSearch,[])
+         await connection.query (search_query, async (err, result) => {
+          if (err) throw (err)
+                        console.log(result)
+                       res.send(result)
         }) 
+        }) 
+    });
+    
+    app.post("/forgotPassword", async (req,res) => {
+      console.log("------> Entred update user")
+      var password = generator.generate({
+        length: 10,
+        numbers: true,
+      });
+      const user = req.body.name;
+      const email = req.body.email;
+      const hashedPassword = await bcrypt.hash(password,10);
+      db.getConnection( async (err, connection) => {
+
+      const sqlSearch = "SELECT * FROM usertable WHERE userName = ? and emailAddress = ?"
+      const search_query = mysql.format(sqlSearch,[user,email])
+      const sqlUpdate = "UPDATE usertable SET password = ? Where  userName = ? and emailAddress = ?"
+      const update_query = mysql.format(sqlUpdate,[hashedPassword,user,email])
+      await connection.query (search_query, async (err, result) => {
+      if (err) throw (err)
+      console.log("------> Search Results")
+      console.log(result.length)
+      if (result.length == 0) {
+      connection.release()
+      console.log("------> User does not exists")
+      res.sendStatus(409) 
+       } 
+       else {
+          await connection.query (update_query, (err, result)=> {
+         connection.release()
+          if (err) throw (err)
+        console.log ("--------> Password Updated")
+        sendmail({
+          from: 'test@finra.org',
+          to: 'ahmedhassain95@gmail.com',
+          subject: 'Password Reset Complete',
+          html: 'Password has been reset to' 
+        }, function (err, reply) {
+          console.log(err && err.stack)
+          console.dir(reply)
+        })
+       console.log(result.insertId)
+      res.writeHead(200, {"Content-Type": "application/json"});
+      var json = JSON.stringify({ 
+      created: true, 
+       });
+       res.end(json);
+       })
+      }                  
+      })    
       }) 
+    })
