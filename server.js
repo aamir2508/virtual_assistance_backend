@@ -4,18 +4,24 @@ const { ExpressPeerServer } = require('peer');
 const groupCallHandler = require('./groupCallHandler');
 const { v4: uuidv4 } = require('uuid');
 // require("dotenv").config()
-const PORT = process.env.PORT_LOCAL || process.env.BACKEND_PORT;
+const PORT = process.env.PORT || 5000 ;
 
 const app = express();
 const cors = require("cors");
 app.use(cors());
 const mysql = require("mysql")
 
-const DB_HOST = process.env.DB_HOST
-const DB_USER = process.env.DB_USER
-const DB_PASSWORD = process.env.DB_PASSWORD
-const DB_DATABASE = process.env.DB_DATABASE
-const DB_PORT = process.env.DB_PORT
+// const DB_HOST = process.env.DB_HOST
+// const DB_USER = process.env.DB_USER
+// const DB_PASSWORD = process.env.DB_PASSWORD
+// const DB_DATABASE = process.env.DB_DATABASE
+// const DB_PORT = process.env.DB_PORT
+
+const DB_HOST = database-1.cwfqyavvsx85.ap-south-1.rds.amazonaws.com
+const DB_USER = admin
+const DB_PASSWORD = root1234
+const DB_DATABASE = userDB
+const DB_PORT = 3306
 
 
 const db = mysql.createPool({
