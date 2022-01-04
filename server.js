@@ -148,6 +148,8 @@ io.on('connection', (socket) => {
     const roomId = uuidv4();
     socket.join(roomId);
 
+    console.log("Adding New Group calls $$$$$$$");
+
     const newGroupCallRoom = {
       peerId: data.peerId,
       hostName: data.username,
@@ -156,6 +158,8 @@ io.on('connection', (socket) => {
     };
 
     groupCallRooms.push(newGroupCallRoom);
+    console.log(groupCallRooms);
+
     io.sockets.emit('broadcast', {
       event: broadcastEventTypes.GROUP_CALL_ROOMS,
       groupCallRooms
@@ -216,6 +220,20 @@ io.on('connection', (socket) => {
       groupCallRooms
     });
   });
+
+
+  socket.on('group-call-remove-notification', (data) => {
+    groupCallRooms = groupCallRooms.filter(room => room.roomId !== data.roomId);
+    console.log("server file filter");
+    console.log(data);
+    console.log(groupCallRooms);
+
+    io.sockets.emit('broadcast', {
+      event: broadcastEventTypes.Remove_CALL_ANS,
+      groupCallRooms
+    });
+  });
+
 });
 
 
