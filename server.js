@@ -4,7 +4,7 @@ const { ExpressPeerServer } = require('peer');
 const groupCallHandler = require('./groupCallHandler');
 const { v4: uuidv4 } = require('uuid');
 require("dotenv").config()
-const PORT = process.env.BACKEND_PORT;
+const PORT = process.env.PORT || process.env.BACKEND_PORT;
 
 const app = express();
 const cors = require("cors");
@@ -26,6 +26,10 @@ const db = mysql.createPool({
    database: DB_DATABASE,     
    port: DB_PORT             
 })
+
+app.get("/", (req, res) => {
+  res.send({ api: "video-talker-api" });
+});
 
 const server = app.listen(PORT, () => {
   console.log(`server is listening on port ${PORT}`);
