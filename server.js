@@ -17,11 +17,11 @@ const mysql = require("mysql")
 // const DB_DATABASE = process.env.DB_DATABASE
 // const DB_PORT = process.env.DB_PORT
 
-const DB_HOST = database-1.cwfqyavvsx85.ap-south-1.rds.amazonaws.com
-const DB_USER = admin
-const DB_PASSWORD = root1234
-const DB_DATABASE = userDB
-const DB_PORT = 3306
+const  DB_HOST = 'database-1.cwfqyavvsx85.ap-south-1.rds.amazonaws.com'
+const  DB_USER = 'admin'
+const  DB_PASSWORD = 'root1234'
+const  DB_DATABASE = 'userDB'
+const  DB_PORT = 3306
 
 
 const db = mysql.createPool({
