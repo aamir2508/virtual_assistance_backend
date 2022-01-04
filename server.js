@@ -3,8 +3,8 @@ const socket = require('socket.io');
 const { ExpressPeerServer } = require('peer');
 const groupCallHandler = require('./groupCallHandler');
 const { v4: uuidv4 } = require('uuid');
-require("dotenv").config()
-const PORT = process.env.PORT || process.env.BACKEND_PORT;
+// require("dotenv").config()
+const PORT = process.env.PORT_LOCAL || process.env.BACKEND_PORT;
 
 const app = express();
 const cors = require("cors");
