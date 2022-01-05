@@ -68,7 +68,8 @@ let groupCallRooms = [];
 const broadcastEventTypes = {
   ACTIVE_USERS: 'ACTIVE_USERS',
   GROUP_CALL_ROOMS: 'GROUP_CALL_ROOMS',
-  Remove_CALL_ANS: 'Remove_CALL_ANS'
+  Remove_CALL_ANS: 'Remove_CALL_ANS',
+  Re_Route_Machine: 'Re_Route_Machine'
 };
 
 io.on('connection', (socket) => {
@@ -241,6 +242,15 @@ io.on('connection', (socket) => {
     io.sockets.emit('broadcast', {
       event: broadcastEventTypes.Remove_CALL_ANS,
       groupCallRooms
+    });
+  });
+
+  socket.on('machine-re-route', (data) => {
+    console.log("machine-re-route broad cast to all to re-route");
+    console.log(data);
+    io.sockets.emit('broadcast', {
+      event: broadcastEventTypes.Re_Route_Machine,
+      data
     });
   });
 
