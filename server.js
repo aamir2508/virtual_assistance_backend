@@ -165,7 +165,8 @@ io.on('connection', (socket) => {
       peerId: data.peerId,
       hostName: data.username,
       socketId: socket.id,
-      roomId: roomId
+      roomId: roomId,
+      isAns: false
     };
 
     groupCallRooms.push(newGroupCallRoom);
@@ -234,7 +235,14 @@ io.on('connection', (socket) => {
 
 
   socket.on('group-call-remove-notification', (data) => {
-    groupCallRooms = groupCallRooms.filter(room => room.roomId !== data.roomId);
+    // groupCallRooms = groupCallRooms.filter(room => room.roomId !== data.roomId);
+    // below logic to add flag for answered
+    for(const key in groupCallRooms){
+      if(groupCallRooms[key].roomId == data.roomId){
+        console.log("inside if add a flag $$$$$$$$$");
+        groupCallRooms[key].isAns = true;
+      }
+    }
     console.log("server file filter");
     console.log(data);
     console.log(groupCallRooms);
@@ -455,6 +463,7 @@ app.post("/login", (req, res)=> {
               const callEndTime = req.body.callEndTime;
               const reason = req.body.reason;;
               const callOrigin = req.body.callOrigin;
+              const recording = req.body.recording;
               const today = new Date(callStartTime);
               const endDate = new Date(callEndTime);
               const minutes = parseInt(Math.abs(endDate.getTime() - today.getTime()) / (1000 * 60) % 60);
@@ -462,8 +471,8 @@ app.post("/login", (req, res)=> {
               const callDuration = minutes + ' Minute ' + seconds + ' Seconds'
               db.getConnection( async (err, connection) => {
                if (err) throw (err)
-               const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?,?,?,?)"
-               const insert_query = mysql.format(sqlInsert,[callStartTime, operatorName,callDuration,callEndTime,callOrigin,reason])
+               const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?,?,?,?,?)"
+               const insert_query = mysql.format(sqlInsert,[callStartTime, operatorName,callDuration,callEndTime,callOrigin,reason,recording])
                  await connection.query (insert_query, (err, result)=> {
                  connection.release()
                  if (err) throw (err)
