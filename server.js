@@ -178,6 +178,9 @@ io.on('connection', (socket) => {
     groupCallRooms.push(newGroupCallRoom);
     console.log(groupCallRooms);
 
+    //save call initi data
+    saveCallInitDetail(newGroupCallRoom);
+
     io.sockets.emit('broadcast', {
       event: broadcastEventTypes.GROUP_CALL_ROOMS,
       groupCallRooms
@@ -270,7 +273,22 @@ io.on('connection', (socket) => {
 
 });
 
-
+const saveCallInitDetail = (data) => {
+  const callerId = data.roomId;
+  const callOriginationTime = new Date();
+  const callOrigin = data.hostName.username;
+      db.getConnection( async (err, connection) => {
+       if (err) throw (err)
+       const sqlInsert = "INSERT INTO callDetails VALUES (0,?,?,?)"
+       const insert_query = mysql.format(sqlInsert,[callerId, callOriginationTime,callOrigin])
+         await connection.query (insert_query, (err, result)=> {
+         connection.release()
+         if (err) throw (err)
+         console.log ("--------> added init details")
+         console.log(result.insertId)
+      }) 
+  }) 
+}
 
 // DB APIS
 
@@ -474,11 +492,12 @@ app.post("/login", (req, res)=> {
               const endDate = new Date(callEndTime);
               const minutes = parseInt(Math.abs(endDate.getTime() - today.getTime()) / (1000 * 60) % 60);
               const seconds = parseInt(Math.abs(endDate.getTime() - today.getTime()) / (1000) % 60); 
-              const callDuration = minutes + ' Minute ' + seconds + ' Seconds'
+              const callDuration = minutes + ' Minute ' + seconds + ' Seconds';
+              const roomId = req.body.roomId;
               db.getConnection( async (err, connection) => {
                if (err) throw (err)
-               const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?,?,?,?,?)"
-               const insert_query = mysql.format(sqlInsert,[callStartTime, operatorName,callDuration,callEndTime,callOrigin,reason,recording])
+               const sqlInsert = "INSERT INTO auditReports VALUES (0,?,?,?,?,?,?,?,?)"
+               const insert_query = mysql.format(sqlInsert,[callStartTime, operatorName,callDuration,callEndTime,callOrigin,reason,recording, roomId])
                  await connection.query (insert_query, (err, result)=> {
                  connection.release()
                  if (err) throw (err)
@@ -556,4 +575,40 @@ app.post("/login", (req, res)=> {
       }                  
       })    
       }) 
-    })
+    });
+
+    app.post("/saveCallDetails", async (req,res) => {
+      const callerId = req.body.callerId;
+      const callOriginationTime = req.body.callOriginationTime;;
+      const callOrigin = req.body.callOrigin;
+      db.getConnection( async (err, connection) => {
+       if (err) throw (err)
+       const sqlInsert = "INSERT INTO callDetails VALUES (0,?,?,?)"
+       const insert_query = mysql.format(sqlInsert,[callerId, callOriginationTime,callOrigin])
+         await connection.query (insert_query, (err, result)=> {
+         connection.release()
+         if (err) throw (err)
+         console.log ("--------> Capture Incoming Call Details")
+         console.log(result.insertId)
+         res.writeHead(200, {"Content-Type": "application/json"});
+          var json = JSON.stringify({ 
+           created: true, 
+            });
+         res.end(json);
+     
+      }) 
+  }) 
+});
+
+app.get("/getMissedCallReport", async (req,res) => {
+  db.getConnection( async (err, connection) => {
+   if (err) throw (err)
+   const sqlSearch = "select * from userDB.callDetails where roomId  not in(SELECT roomId FROM userDB.auditReports)"
+   const search_query = mysql.format(sqlSearch,[])
+   await connection.query (search_query, async (err, result) => {
+    if (err) throw (err)
+                  console.log(result)
+                 res.send(result)
+  }) 
+  }) 
+});
